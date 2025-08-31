@@ -12,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -20,7 +21,10 @@ import net.minecraft.world.World;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import static lynk.oneblock.Oneblock.MOD_SAYS;
 import static lynk.oneblock.utils.Server.*;
@@ -205,6 +209,10 @@ public class GameObject {
     public static boolean randomBlockMode = false;
     public static boolean randomRareDropMode = false;
     public static boolean allowBlocksJustAboveOneBlock = false;
+    private static final HashMap<String, String> BLOCK_ALIASES = new HashMap<>();
+    private static final HashMap<String, String> ITEM_ALIASES = new HashMap<>();
+    private static final Set<String> UNRESOLVED_BLOCKS_WARNED = new HashSet<>();
+    private static final Set<String> UNRESOLVED_ITEMS_WARNED = new HashSet<>();
 
 
     // Nested class to mirror the static fields for serialization
@@ -306,6 +314,109 @@ public class GameObject {
             System.out.println(MOD_SAYS + "An error occurred.");
             e.printStackTrace();
         }
+    }
+
+    private static String normalizeKey(String s) {
+        return s == null ? "" : s.trim().toUpperCase().replace(" ", "").replace("_", "").replace("-", "");
+    }
+
+    private static void ensureAliasMapsInit() {
+        if (!BLOCK_ALIASES.isEmpty() || !ITEM_ALIASES.isEmpty()) return;
+        // Common block aliases observed in logs and probable mismatches
+        BLOCK_ALIASES.put(normalizeKey("NETHER RACK"), "minecraft:netherrack");
+        BLOCK_ALIASES.put(normalizeKey("QUARTZ ORE"), "minecraft:nether_quartz_ore");
+        BLOCK_ALIASES.put(normalizeKey("LAPIS LAZULI ORE"), "minecraft:lapis_ore");
+        BLOCK_ALIASES.put(normalizeKey("SEA GRASS"), "minecraft:seagrass");
+        BLOCK_ALIASES.put(normalizeKey("DRIP LEAF"), "minecraft:small_dripleaf");
+        BLOCK_ALIASES.put(normalizeKey("SCULK GROWTH"), "minecraft:sculk");
+        BLOCK_ALIASES.put(normalizeKey("POWDERED SNOW CAULDRON"), "minecraft:powder_snow_cauldron");
+
+        // Item aliases (not exhaustive; covers common mistakes)
+        ITEM_ALIASES.put(normalizeKey("ZOMBIE FLESH"), "minecraft:rotten_flesh");
+        ITEM_ALIASES.put(normalizeKey("GOLD SWORD"), "minecraft:golden_sword");
+        ITEM_ALIASES.put(normalizeKey("PARROT FEATHER"), "minecraft:feather");
+        ITEM_ALIASES.put(normalizeKey("OCELOT FUR"), "minecraft:leather");
+        ITEM_ALIASES.put(normalizeKey("FOX FUR"), "minecraft:leather");
+        ITEM_ALIASES.put(normalizeKey("WOLF FUR"), "minecraft:leather");
+        ITEM_ALIASES.put(normalizeKey("POLAR BEAR FUR"), "minecraft:leather");
+        ITEM_ALIASES.put(normalizeKey("MOOSHROOM FUR"), "minecraft:leather");
+        ITEM_ALIASES.put(normalizeKey("MOUNTAIN MAP"), "minecraft:map");
+    }
+
+    private static Block resolveBlockToken(String token) {
+        ensureAliasMapsInit();
+        if (token == null || token.isEmpty()) return null;
+
+        // Try direct identifier
+        try {
+            if (token.contains(":")) {
+                Identifier id = new Identifier(token);
+                return Registries.BLOCK.getOrEmpty(id).orElse(null);
+            }
+        } catch (Exception ignored) {}
+
+        // Alias lookup
+        String aliasId = BLOCK_ALIASES.get(normalizeKey(token));
+        if (aliasId != null) {
+            Identifier id = new Identifier(aliasId);
+            return Registries.BLOCK.getOrEmpty(id).orElse(null);
+        }
+
+        // Guess identifier from name
+        try {
+            String guess = token.toLowerCase().replace(' ', '_').replace('-', '_');
+            Identifier id = new Identifier("minecraft", guess);
+            Block byGuess = Registries.BLOCK.getOrEmpty(id).orElse(null);
+            if (byGuess != null) return byGuess;
+        } catch (Exception ignored) {}
+
+        // Fallback: match by display name normalization
+        String target = normalizeKey(token);
+        for (Block b : Registries.BLOCK) {
+            String n = normalizeKey(b.getName().getString());
+            if (n.equals(target)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    private static Item resolveItemToken(String token) {
+        ensureAliasMapsInit();
+        if (token == null || token.isEmpty()) return null;
+
+        // Try direct identifier
+        try {
+            if (token.contains(":")) {
+                Identifier id = new Identifier(token);
+                return Registries.ITEM.getOrEmpty(id).orElse(null);
+            }
+        } catch (Exception ignored) {}
+
+        // Alias lookup
+        String aliasId = ITEM_ALIASES.get(normalizeKey(token));
+        if (aliasId != null) {
+            Identifier id = new Identifier(aliasId);
+            return Registries.ITEM.getOrEmpty(id).orElse(null);
+        }
+
+        // Guess identifier from name
+        try {
+            String guess = token.toLowerCase().replace(' ', '_').replace('-', '_');
+            Identifier id = new Identifier("minecraft", guess);
+            Item byGuess = Registries.ITEM.getOrEmpty(id).orElse(null);
+            if (byGuess != null) return byGuess;
+        } catch (Exception ignored) {}
+
+        // Fallback: match by display name normalization
+        String target = normalizeKey(token);
+        for (Item i : Registries.ITEM) {
+            String n = normalizeKey(i.getName().getString());
+            if (n.equals(target)) {
+                return i;
+            }
+        }
+        return null;
     }
 
     /**
@@ -512,27 +623,31 @@ public class GameObject {
             Item randomItem = Registries.ITEM.get(randomIndex);
             stack = new ItemStack(randomItem);
         }else{
-            Boolean itemFound = false;
+            boolean itemFound = false;
             MinecraftServer server = world.getServer();
             Integer randomLevel = randomInt(GameObject.currentLevel);
             Integer maxRareLevel = GameObject.rareDrops.length;
-            Integer randomRare = null;
+            Integer randomRare;
             if(randomLevel < maxRareLevel){
-                randomRare = randomInt(rareDrops[randomLevel].length);// get a random block from the array
+                randomRare = randomInt(rareDrops[randomLevel].length);
             }else{
                 randomLevel = randomInt(maxRareLevel);
-                randomRare = randomInt(rareDrops[maxRareLevel-1].length);// get a random block from the array
+                randomRare = randomInt(rareDrops[maxRareLevel-1].length);
             }
 
-            for(Item item : Registries.ITEM){
-                if(item.getName().getString().toUpperCase().equals(GameObject.rareDrops[randomLevel][randomRare].toUpperCase())){
-                    stack = new ItemStack(item);
-                    itemFound = true;
-                }
+            String token = GameObject.rareDrops[randomLevel][randomRare];
+            Item item = resolveItemToken(token);
+            if (item != null) {
+                stack = new ItemStack(item);
+                itemFound = true;
             }
             if(!itemFound){
-                String message = (MOD_SAYS + "Could not find the following item: \n " + GameObject.rareDrops[randomLevel][randomRare].toString());
-                server.getPlayerManager().broadcast(Text.of(message), false);
+                String key = normalizeKey(token);
+                if (!UNRESOLVED_ITEMS_WARNED.contains(key)) {
+                    UNRESOLVED_ITEMS_WARNED.add(key);
+                    String message = (MOD_SAYS + "Could not find the following item: \n " + token);
+                    server.getPlayerManager().broadcast(Text.of(message), false);
+                }
             }
         }
 
@@ -635,19 +750,48 @@ public class GameObject {
 
         }else{
             Integer randomLevel = randomInt(GameObject.currentLevel);
-            Integer randomBlock = randomInt(levels[randomLevel].length);
-            Boolean blockFound = false;
-            for(Block block : Registries.BLOCK) {
-                if (block.getName().getString().toUpperCase().equals(levels[randomLevel][randomBlock].toString().toUpperCase())) {
-                    world.setBlockState(getOneBlockPos(), block.getDefaultState());
-                    blockFound = true;
+            Integer randomIdx = randomInt(levels[randomLevel].length);
+            String token = levels[randomLevel][randomIdx];
+            Block resolved = resolveBlockToken(token);
+            if (resolved != null) {
+                world.setBlockState(getOneBlockPos(), resolved.getDefaultState());
+            } else {
+                world.setBlockState(getOneBlockPos(), Blocks.GRASS_BLOCK.getDefaultState());
+                String key = normalizeKey(token);
+                if (!UNRESOLVED_BLOCKS_WARNED.contains(key)) {
+                    UNRESOLVED_BLOCKS_WARNED.add(key);
+                    String message = (MOD_SAYS + "Could not find the following block: \n " + token);
+                    server.getPlayerManager().broadcast(Text.of(message), false);
                 }
             }
-            if(!blockFound){
-                world.setBlockState(getOneBlockPos(), Blocks.GRASS_BLOCK.getDefaultState());
-                String message = (MOD_SAYS + "Could not find the following block: \n " + levels[randomLevel][randomBlock].toString());
-                server.getPlayerManager().broadcast(Text.of(message), false);
+        }
+    }
+
+    /**
+     * Validate configured block and item tokens once at startup and log unresolved ones.
+     */
+    public static void validateConfig(MinecraftServer server) {
+        ensureAliasMapsInit();
+        Set<String> unresolved = new HashSet<>();
+        // Blocks
+        for (int i = 0; i < levels.length; i++) {
+            for (String token : levels[i]) {
+                if (resolveBlockToken(token) == null) unresolved.add("block:" + token);
             }
+        }
+        // Items
+        for (int i = 0; i < rareDrops.length; i++) {
+            for (String token : rareDrops[i]) {
+                if (resolveItemToken(token) == null) unresolved.add("item:" + token);
+            }
+        }
+        if (!unresolved.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(MOD_SAYS).append("Unresolved entries (using fallbacks when encountered):\n");
+            for (String u : unresolved) {
+                sb.append(" - ").append(u).append("\n");
+            }
+            server.getPlayerManager().broadcast(Text.of(sb.toString()), false);
         }
     }
 

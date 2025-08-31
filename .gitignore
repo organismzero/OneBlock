@@ -1,0 +1,23 @@
+# Gradle
+.gradle/
+build/
+
+# Fabric Loom runtime
+run/
+
+# IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Logs and local files
+*.log
+livelog.log
+
+# OS / misc
+.DS_Store
+Thumbs.db
+

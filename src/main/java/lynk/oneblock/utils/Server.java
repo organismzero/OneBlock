@@ -41,6 +41,8 @@ public class Server {
         }else{
             readSaveFile();
         };
+        // Validate configured tokens and report issues once
+        GameObject.validateConfig(server);
         respawnOneBlock(server.getOverworld());
     }
 
