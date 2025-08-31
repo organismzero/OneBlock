@@ -786,7 +786,7 @@ public class GameObject {
                 }
             }
 
-            world.setBlockState(getOneBlockPos(), chosen.getDefaultState());
+            world.setBlockState(getOneBlockPos(), chosen.getDefaultState(), 3);
 
         }else{
             Integer randomLevel = randomInt(GameObject.currentLevel);
@@ -794,9 +794,9 @@ public class GameObject {
             String token = levels[randomLevel][randomIdx];
             Block resolved = resolveBlockToken(token);
             if (resolved != null) {
-                world.setBlockState(getOneBlockPos(), resolved.getDefaultState());
+                world.setBlockState(getOneBlockPos(), resolved.getDefaultState(), 3);
             } else {
-                world.setBlockState(getOneBlockPos(), Blocks.GRASS_BLOCK.getDefaultState());
+                world.setBlockState(getOneBlockPos(), Blocks.GRASS_BLOCK.getDefaultState(), 3);
                 String key = normalizeKey(token);
                 if (!UNRESOLVED_BLOCKS_WARNED.contains(key)) {
                     UNRESOLVED_BLOCKS_WARNED.add(key);
