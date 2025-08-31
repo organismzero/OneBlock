@@ -351,24 +351,30 @@ public class GameObject {
         // Try direct identifier
         try {
             if (token.contains(":")) {
-                Identifier id = new Identifier(token);
-                return Registries.BLOCK.getOrEmpty(id).orElse(null);
+                Identifier id = Identifier.tryParse(token);
+                if (id != null) {
+                    return Registries.BLOCK.getOptional(id).orElse(null);
+                }
             }
         } catch (Exception ignored) {}
 
         // Alias lookup
         String aliasId = BLOCK_ALIASES.get(normalizeKey(token));
         if (aliasId != null) {
-            Identifier id = new Identifier(aliasId);
-            return Registries.BLOCK.getOrEmpty(id).orElse(null);
+            Identifier id = Identifier.tryParse(aliasId);
+            if (id != null) {
+                return Registries.BLOCK.getOptional(id).orElse(null);
+            }
         }
 
         // Guess identifier from name
         try {
             String guess = token.toLowerCase().replace(' ', '_').replace('-', '_');
-            Identifier id = new Identifier("minecraft", guess);
-            Block byGuess = Registries.BLOCK.getOrEmpty(id).orElse(null);
-            if (byGuess != null) return byGuess;
+            Identifier id = Identifier.tryParse("minecraft:" + guess);
+            if (id != null) {
+                Block byGuess = Registries.BLOCK.getOptional(id).orElse(null);
+                if (byGuess != null) return byGuess;
+            }
         } catch (Exception ignored) {}
 
         // Fallback: match by display name normalization
@@ -389,24 +395,30 @@ public class GameObject {
         // Try direct identifier
         try {
             if (token.contains(":")) {
-                Identifier id = new Identifier(token);
-                return Registries.ITEM.getOrEmpty(id).orElse(null);
+                Identifier id = Identifier.tryParse(token);
+                if (id != null) {
+                    return Registries.ITEM.getOptional(id).orElse(null);
+                }
             }
         } catch (Exception ignored) {}
 
         // Alias lookup
         String aliasId = ITEM_ALIASES.get(normalizeKey(token));
         if (aliasId != null) {
-            Identifier id = new Identifier(aliasId);
-            return Registries.ITEM.getOrEmpty(id).orElse(null);
+            Identifier id = Identifier.tryParse(aliasId);
+            if (id != null) {
+                return Registries.ITEM.getOptional(id).orElse(null);
+            }
         }
 
         // Guess identifier from name
         try {
             String guess = token.toLowerCase().replace(' ', '_').replace('-', '_');
-            Identifier id = new Identifier("minecraft", guess);
-            Item byGuess = Registries.ITEM.getOrEmpty(id).orElse(null);
-            if (byGuess != null) return byGuess;
+            Identifier id = Identifier.tryParse("minecraft:" + guess);
+            if (id != null) {
+                Item byGuess = Registries.ITEM.getOptional(id).orElse(null);
+                if (byGuess != null) return byGuess;
+            }
         } catch (Exception ignored) {}
 
         // Fallback: match by display name normalization

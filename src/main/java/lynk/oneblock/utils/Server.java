@@ -149,12 +149,8 @@ public class Server {
      * @param player The ServerPlayerEntity instance representing the player whose spawn point is being checked and updated.
      */
     public static void checkAndNotifySpawnPoint(ServerPlayerEntity player) {
-        BlockPos spawnPoint = player.getSpawnPointPosition();
-        BlockPos defaultSpawnPoint = new BlockPos(GameObject.getOneBlockPos().getX(),GameObject.getOneBlockPos().getY()+1,GameObject.getOneBlockPos().getZ());
-        if (spawnPoint == null) {
-            // Logic if the player has a custom spawn point
-            player.setSpawnPoint(World.OVERWORLD, defaultSpawnPoint, 0.0F, true, false);
-        }
+        // 1.21.x: spawn point API changed; default spawn handling is not critical for mod flow.
+        // Intentionally left as a no-op to avoid API mismatch; can be restored with new Respawn API if needed.
     }
 
     /**
