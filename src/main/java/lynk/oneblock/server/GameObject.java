@@ -80,7 +80,7 @@ public class GameObject {
             // Level 15: Exotic Wood and Plants
             {"BAMBOO", "SUGAR CANE", "VINE", "LILY PAD", "DANDELION", "POPPY", "BLUE ORCHID"},
             // Level 16: Rare Earths and Stones
-            {"TUFF", "CALCITE", "AMETHYST BLOCK", "COPPER ORE", "RAW COPPER BLOCK", "RAW IRON BLOCK"},
+            {"TUFF", "POLISHED TUFF", "TUFF BRICKS", "CHISELED TUFF", "CALCITE", "AMETHYST BLOCK", "COPPER ORE", "RAW COPPER BLOCK", "RAW IRON BLOCK"},
             // Level 17: A Touch of Green
             {"GRASS", "FERN", "DEAD BUSH", "SEA GRASS", "AZALEA", "FLOWERING AZALEA"},
             // Level 18: Varied Stone Types
@@ -88,9 +88,9 @@ public class GameObject {
             // Level 19: Underwater Blocks
             {"PRISMARINE BRICKS", "DARK PRISMARINE", "TUBE CORAL BLOCK", "BRAIN CORAL BLOCK", "BUBBLE CORAL BLOCK", "FIRE CORAL BLOCK"},
             // Level 20: End Game Blocks
-            {"CRYING OBSIDIAN", "END GATEWAY", "PURPUR PILLAR", "END ROD", "OBSIDIAN", "RESPAWN ANCHOR"},
+            {"CRYING OBSIDIAN", "END GATEWAY", "PURPUR PILLAR", "END ROD", "OBSIDIAN", "RESPAWN ANCHOR", "VAULT"},
             // Level 21: Lush Caves
-            {"MOSS BLOCK", "GLOW BERRIES", "DRIP LEAF", "SPORADIC BLOSSOM", "CLAY BALL", "HANGING ROOTS", "MOSS CARPET"},
+            {"MOSS BLOCK", "GLOW BERRIES", "DRIP LEAF", "SPORE BLOSSOM", "CLAY BALL", "HANGING ROOTS", "MOSS CARPET"},
             // Level 22: Deep Dark Biome
             {"SCULK SENSOR", "SCULK GROWTH", "SCULK VEIN", "SCULK CATALYST", "SCULK SHRIEKER", "DEEPSLATE GOLD ORE", "DEEPSLATE REDSTONE ORE"},
             // Level 23: Mountain Peaks
@@ -164,7 +164,7 @@ public class GameObject {
         // Level 9: Rare Biome Finds
         {"BAMBOO", "COCOA BEANS", "CHORUS FRUIT", "PODZOL", "MYCELIUM", "BLUE ICE"},
         // Level 10: Specialty Items
-        {"HONEYCOMB", "NETHERITE SCRAP", "ANCIENT DEBRIS", "AMETHYST SHARD", "GLOW BERRIES"},
+        {"HONEYCOMB", "NETHERITE SCRAP", "ANCIENT DEBRIS", "AMETHYST SHARD", "GLOW BERRIES", "WIND CHARGE"},
         // Level 11: Overworld Night Drops
         {"SPIDER EYE", "ENDER PEARL", "BONE", "STRING", "GUNPOWDER", "ZOMBIE FLESH", "KELP", "SEA GRASS", "SEA PICKLE"},
         // Level 12: Farming Produce
@@ -178,7 +178,7 @@ public class GameObject {
         // Level 16: Underground Gems
         {"EMERALD", "DIAMOND", "GOLD ORE", "IRON ORE", "COAL", "REDSTONE"},
         // Level 17: Enchanted Items
-        {"ENCHANTED BOOK", "GOLDEN APPLE", "ENCHANTED GOLDEN APPLE", "EXPERIENCE BOTTLE"},
+        {"ENCHANTED BOOK", "GOLDEN APPLE", "ENCHANTED GOLDEN APPLE", "EXPERIENCE BOTTLE", "BREEZE ROD", "TRIAL KEY", "OMINOUS TRIAL KEY"},
         // Level 18: Deep Sea Loot
         {"SEA LANTERN", "SPONGE", "WET SPONGE", "HEART OF THE SEA", "NAUTILUS SHELL", "TROPICAL FISH"},
         // Level 19: Nether Fortresses
@@ -345,6 +345,19 @@ public class GameObject {
         ITEM_ALIASES.put(normalizeKey("POLAR BEAR FUR"), "minecraft:leather");
         ITEM_ALIASES.put(normalizeKey("MOOSHROOM FUR"), "minecraft:leather");
         ITEM_ALIASES.put(normalizeKey("MOUNTAIN MAP"), "minecraft:map");
+
+        // New 1.21 items
+        ITEM_ALIASES.put(normalizeKey("WIND CHARGE"), "minecraft:wind_charge");
+        ITEM_ALIASES.put(normalizeKey("BREEZE ROD"), "minecraft:breeze_rod");
+        ITEM_ALIASES.put(normalizeKey("TRIAL KEY"), "minecraft:trial_key");
+        ITEM_ALIASES.put(normalizeKey("OMINOUS TRIAL KEY"), "minecraft:ominous_trial_key");
+
+        // Block aliases
+        BLOCK_ALIASES.put(normalizeKey("SPORADIC BLOSSOM"), "minecraft:spore_blossom");
+        BLOCK_ALIASES.put(normalizeKey("VAULT"), "minecraft:vault");
+        BLOCK_ALIASES.put(normalizeKey("POLISHED TUFF"), "minecraft:polished_tuff");
+        BLOCK_ALIASES.put(normalizeKey("TUFF BRICKS"), "minecraft:tuff_bricks");
+        BLOCK_ALIASES.put(normalizeKey("CHISELED TUFF"), "minecraft:chiseled_tuff");
     }
 
     private static Block resolveBlockToken(String token) {
