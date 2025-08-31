@@ -753,23 +753,27 @@ public class GameObject {
     public static void respawnOneBlock(World world){
         MinecraftServer server = world.getServer();
         if(GameObject.randomBlockMode){
-            // Create an instance of Random class
+            // Robust random selection with bounded attempts, avoiding infinite loop on invalid picks
             Random random = new Random();
-            // Generate a random index between 0 (inclusive) and the size of the registry (exclusive)
-            int randomIndex = random.nextInt(Registries.BLOCK.size());
+            int size = Registries.BLOCK.size();
+            Block chosen = Blocks.STONE; // fallback
+            BlockPos pos = GameObject.getOneBlockPos();
 
-            // Select a random item from the registry using the random index
-            Block randomBlock = Registries.BLOCK.get(randomIndex);
-
-            while (true) {
-                BlockState state = randomBlock.getDefaultState();
-                if (isBlockBreakable(state, world, GameObject.getOneBlockPos()) && isStandardCube(state, world, GameObject.getOneBlockPos())) {
+            for (int tries = 0; tries < Math.min(size, 512); tries++) {
+                int skip = random.nextInt(size);
+                int i = 0;
+                Block candidate = chosen;
+                for (Block b : Registries.BLOCK) {
+                    if (i++ == skip) { candidate = b; break; }
+                }
+                BlockState state = candidate.getDefaultState();
+                if (isBlockBreakable(state, world, pos) && isStandardCube(state, world, pos)) {
+                    chosen = candidate;
                     break;
                 }
-                randomBlock = Registries.BLOCK.get(randomIndex);
             }
 
-            world.setBlockState(getOneBlockPos(), randomBlock.getDefaultState());
+            world.setBlockState(getOneBlockPos(), chosen.getDefaultState());
 
         }else{
             Integer randomLevel = randomInt(GameObject.currentLevel);
