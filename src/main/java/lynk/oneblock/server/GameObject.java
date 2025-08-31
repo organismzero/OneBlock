@@ -13,6 +13,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
@@ -353,7 +356,8 @@ public class GameObject {
             if (token.contains(":")) {
                 Identifier id = Identifier.tryParse(token);
                 if (id != null) {
-                    return Registries.BLOCK.getOptional(id).orElse(null);
+                    RegistryKey<Block> key = RegistryKey.of(RegistryKeys.BLOCK, id);
+                    return Registries.BLOCK.getOptional(key).map(RegistryEntry::value).orElse(null);
                 }
             }
         } catch (Exception ignored) {}
@@ -363,7 +367,8 @@ public class GameObject {
         if (aliasId != null) {
             Identifier id = Identifier.tryParse(aliasId);
             if (id != null) {
-                return Registries.BLOCK.getOptional(id).orElse(null);
+                RegistryKey<Block> key = RegistryKey.of(RegistryKeys.BLOCK, id);
+                return Registries.BLOCK.getOptional(key).map(RegistryEntry::value).orElse(null);
             }
         }
 
@@ -372,7 +377,8 @@ public class GameObject {
             String guess = token.toLowerCase().replace(' ', '_').replace('-', '_');
             Identifier id = Identifier.tryParse("minecraft:" + guess);
             if (id != null) {
-                Block byGuess = Registries.BLOCK.getOptional(id).orElse(null);
+                RegistryKey<Block> key = RegistryKey.of(RegistryKeys.BLOCK, id);
+                Block byGuess = Registries.BLOCK.getOptional(key).map(RegistryEntry::value).orElse(null);
                 if (byGuess != null) return byGuess;
             }
         } catch (Exception ignored) {}
@@ -397,7 +403,8 @@ public class GameObject {
             if (token.contains(":")) {
                 Identifier id = Identifier.tryParse(token);
                 if (id != null) {
-                    return Registries.ITEM.getOptional(id).orElse(null);
+                    RegistryKey<Item> key = RegistryKey.of(RegistryKeys.ITEM, id);
+                    return Registries.ITEM.getOptional(key).map(RegistryEntry::value).orElse(null);
                 }
             }
         } catch (Exception ignored) {}
@@ -407,7 +414,8 @@ public class GameObject {
         if (aliasId != null) {
             Identifier id = Identifier.tryParse(aliasId);
             if (id != null) {
-                return Registries.ITEM.getOptional(id).orElse(null);
+                RegistryKey<Item> key = RegistryKey.of(RegistryKeys.ITEM, id);
+                return Registries.ITEM.getOptional(key).map(RegistryEntry::value).orElse(null);
             }
         }
 
@@ -416,7 +424,8 @@ public class GameObject {
             String guess = token.toLowerCase().replace(' ', '_').replace('-', '_');
             Identifier id = Identifier.tryParse("minecraft:" + guess);
             if (id != null) {
-                Item byGuess = Registries.ITEM.getOptional(id).orElse(null);
+                RegistryKey<Item> key = RegistryKey.of(RegistryKeys.ITEM, id);
+                Item byGuess = Registries.ITEM.getOptional(key).map(RegistryEntry::value).orElse(null);
                 if (byGuess != null) return byGuess;
             }
         } catch (Exception ignored) {}
