@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
@@ -740,7 +741,8 @@ public class GameObject {
             Block randomBlock = Registries.BLOCK.get(randomIndex);
 
             while (true) {
-                if (isBlockBreakable(randomBlock) && isStandardCube(randomBlock.getDefaultState(), world, GameObject.getOneBlockPos())) {
+                BlockState state = randomBlock.getDefaultState();
+                if (isBlockBreakable(state, world, GameObject.getOneBlockPos()) && isStandardCube(state, world, GameObject.getOneBlockPos())) {
                     break;
                 }
                 randomBlock = Registries.BLOCK.get(randomIndex);

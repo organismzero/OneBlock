@@ -2,6 +2,10 @@
 
 **One Block** is a unique Minecraft Fabric mod where players spawn in an empty world with a single, magical block. This block respawns every time it's broken, evolving and unlocking new items as players progress through levels.
 
+### Compatibility
+- Minecraft: 1.21.8 (1.21.x supported)
+- Java: 21 or newer (requires toolchain JDK 21)
+
 ### Key Features:
 - **Dynamic Block**: A single block that respawns upon breaking and levels up.
 - **Fully Configurable**: Customize levels, rare drops, and progression to your liking.

@@ -158,13 +158,15 @@ public class Server {
     }
 
     /**
-     * Check if the block at a specific position is breakable.
-     * @param block The world where the block exists.
+     * Check if a block state at a position is breakable in the given world.
+     * Uses state hardness which depends on world and position in 1.21+.
+     * @param state The block state to evaluate.
+     * @param world The world context.
+     * @param pos   The position of the block.
      * @return true if breakable, false otherwise.
      */
-    public static boolean isBlockBreakable(Block block) {
-        // Check if the block is not air and has hardness not equal to -1.0f
-        return !block.getName().getString().equals("AIR") && block.getHardness() != -1.0f;
+    public static boolean isBlockBreakable(BlockState state, World world, BlockPos pos) {
+        return !state.isAir() && state.getHardness(world, pos) != -1.0f;
     }
 
     /**
