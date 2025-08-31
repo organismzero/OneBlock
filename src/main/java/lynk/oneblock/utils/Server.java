@@ -3,6 +3,7 @@ package lynk.oneblock.utils;
 import lynk.oneblock.server.GameObject;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -43,7 +44,21 @@ public class Server {
         };
         // Validate configured tokens and report issues once
         GameObject.validateConfig(server);
+
+        // Ensure a single bedrock block exists beneath the One Block
+        ensureBedrockBelowOneBlock(server.getOverworld());
+
+        // Spawn/respawn the One Block
         respawnOneBlock(server.getOverworld());
+    }
+
+    /**
+     * Ensures there is a bedrock block directly beneath the One Block position.
+     * Safe to call multiple times; simply sets the block at Y-1 to bedrock.
+     */
+    private static void ensureBedrockBelowOneBlock(World world) {
+        BlockPos below = new BlockPos(GameObject.getOneBlockPos().getX(), GameObject.getOneBlockPos().getY()-1, GameObject.getOneBlockPos().getZ());
+        world.setBlockState(below, Blocks.BEDROCK.getDefaultState(), 3);
     }
 
     /**
